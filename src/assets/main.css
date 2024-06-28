@@ -1,0 +1,18 @@
+@import './font/font.css';
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    font-weight: normal;
+}
+
+body {
+    min-height: 100vh;
+    background-color: rgba(245, 245, 245, 1) !important;
+}
+
+#app {
+    font-family: 'Vazir';
+}
