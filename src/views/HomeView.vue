@@ -71,23 +71,32 @@
           </div>
         </div>
         <div class="footer bg-white px-md-5 py-md-2">
-          <button type="submit" class="btn btn-submit">ثبت و ادامه</button>
+          <button type="submit" class="btn btn-submit">
+            <Loading v-if="loading == true" />
+            <span v-else>ثبت و ادامه</span>
+          </button>
         </div>
       </form>
     </transition>
     <transition name="slide-fade">
       <div v-show="step === 2" class="step-box">
         <p class="form-title">
-          <btn class="btn navigation-btn"><img src="/src/assets/back.png" alt=""></btn>انتخاب آدرس
+          <btn class="btn navigation-btn" @click="prev()"><img src="/src/assets/back.png" alt=""></btn>انتخاب آدرس
         </p>
-        <div class="form-box">
+        <div class="form-box map">
+          <div>
+            <p class="map-title">موقعیت مورد نظر خود را روی نقشه مشخص کنید</p>
+          </div>
           <GoogleMap :api-key="googleKey" style="width: 100%; height: 22rem" :center="center" :zoom="15"
             class="google-map">
             <Marker :options="markerOptions" @dragend="map" />
           </GoogleMap>
         </div>
         <div class="footer bg-white px-md-5 py-md-2">
-          <button v-show="step === 2" class="btn btn-submit" @click="RegisterUser">ثبت و ادامه</button>
+          <button v-show="step === 2" class="btn btn-submit" @click="RegisterUser">
+            <Loading v-if="loading == true" />
+            <span v-else>ثبت و ادامه</span>
+          </button>
         </div>
       </div>
     </transition>
@@ -108,6 +117,7 @@
 import axios from 'axios';
 import { ref, watch } from 'vue';
 import { GoogleMap, Marker } from 'vue3-google-map';
+import Loading from '@/components/LoadingComponent.vue';
 
 
 const step = ref(1);
@@ -120,6 +130,7 @@ const gender = ref('male');
 const AlertError = ref(false);
 const errorMessage = ref('');
 const userAddress = ref('');
+const loading = ref(false);
 
 const firstNameValidation = ref(false);
 const lastNameValidation = ref(false);
@@ -174,8 +185,10 @@ const RegisterUser = () => {
     },
     data: payload
   };
+  loading.value = true;
   axios(config).then((response) => {
     userAddress.value = response.data
+    loading.value = false;
     next()
   })
     .catch(httpErrorHandler)
@@ -195,21 +208,27 @@ const httpErrorHandler = (error) => {
 
     if (error.code === 'ERR_NETWORK') {
       errorAlert(error.message)
+      loading.value = false;
     } else if (error.code === 'ERR_CANCELED') {
       errorAlert(error.message)
+      loading.value = false;
     }
     if (response) {
       const statusCode = response?.status
       if (statusCode === 404) {
         errorAlert(response.data.detail)
+        loading.value = false;
       } else if (statusCode === 401) {
         errorAlert(response.data.detail)
+        loading.value = false;
       }
     } else if (request) {
       errorAlert(response.data.detail)
+      loading.value = false;
     }
   }
   errorAlert(error.message)
+  loading.value = false;
 }
 
 const handleSubmit = () => {
@@ -278,6 +297,7 @@ main {
 
 .step-box {
   margin: 1rem;
+  width: 100%;
 }
 
 .form-box {
@@ -286,6 +306,10 @@ main {
   border-radius: 4px;
   box-shadow: 0px 0px 11px 0px rgba(0, 0, 0, 0.1);
   padding-bottom: 7rem;
+}
+
+.form-box.map {
+  padding: 0 !important;
 }
 
 .form-box .google-map {
@@ -367,9 +391,24 @@ main {
 
 .navigation-btn {
   border: 0 !important;
+  padding-right: 0;
+}
+
+.map-title {
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+  padding-right: 2rem;
+  margin-bottom: 0;
+  font-size: 12px;
+  color: rgba(55, 71, 79, 1);
+  font-weight: 600;
 }
 
 @media(min-width:768px) {
+  .step-box {
+    width: auto;
+  }
+
   .form-box {
     padding: 1rem 2rem;
     max-width: 50rem;
